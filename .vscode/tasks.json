@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Auto Commit",
+      "type": "shell",
+      "command": "./autoCommit.sh ${file}",
+      "group": "build",
+      "problemMatcher": [],
+      "runOn": "fileSave"
+    }
+  ]
+}
