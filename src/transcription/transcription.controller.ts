@@ -22,7 +22,7 @@ export class TranscriptionController {
       fs.mkdirSync(uploadsDir);
     }
 
-    / 
+    // Save the file temporarily or use the buffer directly
     const filePath = path.join(uploadsDir, file.originalname);
     fs.writeFileSync(filePath, file.buffer);
 
