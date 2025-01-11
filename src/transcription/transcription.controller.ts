@@ -13,7 +13,7 @@ import * as path from 'path';
 export class TranscriptionController {
   constructor(private readonly transcriptionService: TranscriptionService) {}
 
-  @Post('transcribe')
+  @Post('')
   @UseInterceptors(FileInterceptor('file')) // Handles file uploads
   async transcribe(@UploadedFile() file: Express.Multer.File): Promise<string> {
     // Ensure the uploads directory exist
