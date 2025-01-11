@@ -9,5 +9,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-// tslint:disable-next-line: no-floating-promises
+
 bootstrap();

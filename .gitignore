@@ -57,4 +57,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /src/utils/service-account-key.json
 src/utils/service-account-key.json
 
-autoCommit.sh
+.vscode/autoCommit.sh
