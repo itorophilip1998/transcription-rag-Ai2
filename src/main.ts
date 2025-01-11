@@ -8,6 +8,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(3000);
-} 
-// 
+}
+// tslint:disable-next-line: no-floating-promises
 bootstrap();
