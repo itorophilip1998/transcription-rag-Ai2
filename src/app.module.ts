@@ -1,9 +1,16 @@
 import { Module } from '@nestjs/common';
-import { TranscriptionService } from './transcription/transcription.service';
-import { TranscriptionController } from './transcription/transcription.controller';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { TranscriptionModule } from './transcription/transcription.module';
+
 @Module({
-  imports: [],
-  providers: [TranscriptionService],
-  controllers: [TranscriptionController],
+  imports: [
+    TranscriptionModule,
+    // Serve files from the "uploads" folder
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads', // URL path to access files
+    }),
+  ],
 })
 export class AppModule {}
