@@ -16,7 +16,7 @@ export class TranscriptionController {
   @Post('transcribe')
   @UseInterceptors(FileInterceptor('file')) // Handles file uploads
   async transcribe(@UploadedFile() file: Express.Multer.File): Promise<string> {
-    // Ensure the uploads directory exists
+    // Ensure the uploads directory exist
     const uploadsDir = path.join(__dirname, '..', 'uploads');
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir);
