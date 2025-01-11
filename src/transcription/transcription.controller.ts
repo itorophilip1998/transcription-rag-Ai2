@@ -19,7 +19,7 @@ export class TranscriptionController {
     // Ensure the uploads directory exists
     const uploadsDir = path.join(__dirname, '..', 'uploads');
     if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir); // Create the directory if it doesn't exist
+      fs.mkdirSync(uploadsDir);
     }
 
     // Save the file temporarily or use the buffer directly
