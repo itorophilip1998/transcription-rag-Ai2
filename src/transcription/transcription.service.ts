@@ -3,15 +3,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
-import { SpeechClient, protos } from '@google-cloud/speech';
+import * as vosk from 'vosk';
 
 @Injectable()
 export class TranscriptionService {
-  private client: SpeechClient;
   private ffmpegPath = ffmpegStatic; // Path to the static ffmpeg binary
 
   constructor() {
-    this.client = new SpeechClient();
+    // Load Vosk model for transcription
+    const modelPath = path.join(__dirname, 'vosk-model'); // Set the path to your Vosk model directory
+    if (!fs.existsSync(modelPath)) {
+      throw new Error(
+        'Vosk model not found! Please download the model from https://alphacephei.com/vosk/models',
+      );
+    }
+    this.model = new vosk.Model(modelPath);
   }
 
   // Function to convert video to audio (WAV format)
@@ -23,7 +29,7 @@ export class TranscriptionService {
       ffmpeg(videoPath)
         .setFfmpegPath(this.ffmpegPath)
         .output(audioPath)
-        .audioCodec('pcm_s16le') // Linear16 format, suitable for Google Speech API
+        .audioCodec('pcm_s16le') // Linear16 format, suitable for Vosk
         .audioFrequency(16000) // Set audio frequency to 16kHz
         .on('end', () => resolve(audioPath))
         .on('error', (err) => reject(`Error during conversion: ${err}`))
@@ -31,29 +37,34 @@ export class TranscriptionService {
     });
   }
 
-  // Function to transcribe audio using Google Cloud Speech-to-Text
+  // Function to transcribe audio using Vosk
   async transcribeAudio(audioPath: string): Promise<string> {
-    const audioBytes = fs.readFileSync(audioPath).toString('base64');
+    const audioStream = fs.createReadStream(audioPath);
+    const recognizer = new vosk.AsrRecognizer(this.model, {
+      sampleRate: 16000,
+    });
 
-    const request = {
-      audio: { content: audioBytes },
-      config: {
-        encoding:
-          protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
-            .LINEAR16, // Correct encoding type
-        sampleRateHertz: 16000,
-        languageCode: 'en-US',
-      },
-    };
-    try {
-      const [response] = await this.client.recognize(request);
-      const transcript = response.results
-        .map((result) => result.alternatives[0].transcript)
-        .join('\n');
-      return transcript;
-    } catch (error) {
-      throw new Error(`Failed to transcribe audio: ${error.message}`);
-    }
+    let transcript = '';
+    audioStream.on('data', (chunk) => {
+      recognizer.acceptWaveform(chunk); // Feed audio data to recognizer
+    });
+
+    audioStream.on('end', () => {
+      const result = recognizer.finalResult();
+      if (result && result.text) {
+        transcript = result.text; // Get the transcript from the final result
+      }
+    });
+
+    return new Promise((resolve, reject) => {
+      audioStream.on('end', () => {
+        if (transcript) {
+          resolve(transcript);
+        } else {
+          reject(new Error('Failed to transcribe audio.'));
+        }
+      });
+    });
   }
 
   // Main method to handle transcription
