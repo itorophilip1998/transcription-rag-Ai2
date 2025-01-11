@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SpeechClient } from '@google-cloud/speech';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
+import { SpeechClient, protos } from '@google-cloud/speech';
 
 @Injectable()
 export class TranscriptionService {
@@ -38,12 +38,13 @@ export class TranscriptionService {
     const request = {
       audio: { content: audioBytes },
       config: {
-        encoding: 'LINEAR16',
+        encoding:
+          protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+            .LINEAR16, // Correct encoding type
         sampleRateHertz: 16000,
         languageCode: 'en-US',
       },
     };
-
     try {
       const [response] = await this.client.recognize(request);
       const transcript = response.results
